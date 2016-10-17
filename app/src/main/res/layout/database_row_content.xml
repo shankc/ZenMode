@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Date"
+        android:textColor="@android:color/black"
+        android:id="@+id/Date" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/black"
+        android:text="test"
+        android:paddingRight="19dp"
+        android:id="@+id/ZenHours"
+        android:textSize="14sp"
+        android:layout_marginTop="34dp"
+        android:layout_below="@+id/ZenText"
+        android:layout_alignEnd="@+id/ZenText" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/black"
+        android:text="move"
+        android:id="@+id/MovementHours"
+        android:textSize="14sp"
+
+        android:layout_marginEnd="52dp"
+        android:layout_alignTop="@+id/ZenHours"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Zen Hours"
+        android:textSize="15sp"
+        android:textStyle="bold"
+
+        android:id="@+id/ZenText"
+        android:layout_marginStart="38dp"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/Date" />
+
+    <TextView
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:text="MoveHour"
+        android:id="@+id/MoveText"
+
+        android:layout_alignBottom="@+id/Date"
+        android:layout_alignEnd="@+id/MovementHours" />
+</RelativeLayout>

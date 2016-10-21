@@ -9,7 +9,6 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -26,6 +25,7 @@ import com.kaidoh.mayuukhvarshney.zenmode.ZenService.ZenBinder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class ZenActiviy extends AppCompatActivity {
 
@@ -39,6 +39,7 @@ public class ZenActiviy extends AppCompatActivity {
     private Context context;
     protected Toolbar toolbar;
     private long ChronoMeterTime=0,LastStop=0;
+    private  long CURRENT_ZEN_TIME=0 ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +68,7 @@ public class ZenActiviy extends AppCompatActivity {
 
         SharedPreferences shared = getSharedPreferences("Settings",Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = shared.edit();
-        editor.putString("WakeTime","07:30:00");
+        editor.putString("WakeTime","21:30:00");
         editor.apply();
 
 
@@ -229,36 +230,27 @@ public class ZenActiviy extends AppCompatActivity {
 
                 Bundle extras = intent.getExtras();
                 boolean state = extras.getBoolean("Movement");
+                long StopWatchTime = extras.getLong("StillTime");
+
                  ZenTimerFragment fragment = (ZenTimerFragment) getSupportFragmentManager().findFragmentById(R.id.container);
-                long Elapsed_Time = SystemClock.elapsedRealtime()-fragment.zen_mode_timer.getBase();
+
                 //  Log.d("ZenActivity","the elapsed time "+Time_Elapsed);
                if(state)
                {
-                    //fragment.zen_mode_timer.setBase(SystemClock.elapsedRealtime()+ ChronoMeterTime);
-
-                 //fragment.zen_mode_timer.setBase(SystemClock.elapsedRealtime()+ChronoMeterTime);
-                   fragment.zen_mode_timer.start();
-
                    SharedPreferences shared = getSharedPreferences("Settings",Context.MODE_PRIVATE);
                    String TimeToRefresh = shared.getString("WakeTime",null);
                    String CurrentTime = getTime();
-                   if(CurrentTime.equals(TimeToRefresh) && !(Today_date.equals(getDate())))
 
-                    //if(Elapsed_Time>=30000 && Elapsed_Time<=33000)
+                 if(CurrentTime.equals(TimeToRefresh) && !(Today_date.equals(getDate()))) //final stop and refresh condiition.
 
-                   {   Log.d("ZenActivity","final counter stop mehtod entered " +SystemClock.elapsedRealtime()+" "+fragment.zen_mode_timer.getBase()+" "+Elapsed_Time);
-                       ZEN.Time_Elapsed(Elapsed_Time);
-                       ZEN.DisplayZenTimes(true);
 
-                       fragment.zen_mode_timer.stop();
-                      fragment.zen_mode_timer.setBase(SystemClock.elapsedRealtime());
-                       ChronoMeterTime = 0;
-                       LastStop=0;
 
-                       // insert the values into database along with date and sleep hours, movement values inside database.
-              //relaod the database fragment from here
+                   {   //Log.d("ZenActivity","final counter stop mehtod entered " +SystemClock.elapsedRealtime()+" "+fragment.zen_mode_timer.getBase()+" "+Elapsed_Time);
+                      ZEN.Time_Elapsed(CURRENT_ZEN_TIME);
+                       ZEN.DisplayZenTimes(true);  // displayed values should be a total of the recived time and a static variable !!
+                   fragment.Timer.setText(ZenTimerFragment.STRING_DEFAULT);
                      mViewPager.getAdapter().notifyDataSetChanged();
-                       fragment.zen_mode_timer.start();
+                     //  fragment.zen_mode_timer.start();
                        Today_date = getDate();
 
                    }
@@ -268,9 +260,17 @@ public class ZenActiviy extends AppCompatActivity {
                }
                 else
                {
-                   //pause the zen timer
-                   fragment.zen_mode_timer.stop();
-//                   ChronoMeterTime =fragment.zen_mode_timer.getBase()- SystemClock.elapsedRealtime();
+                   Log.d("ZenActivity","state false reached");
+                   if(StopWatchTime!=0)
+                   {
+                       //update text view with the converted time in mili seconds.
+                     //Log.d("ZenActivity","converting miliseconds to hours  "+MilliSecondCOnversion(StopWatchTime));
+                    CURRENT_ZEN_TIME+=StopWatchTime;
+                       Log.d("ZenActivity"," the stopwatch time is "+StopWatchTime+" "+CURRENT_ZEN_TIME +" "+GenericTimeConversion(CURRENT_ZEN_TIME));
+                      String ZEN_TIMER= GenericTimeConversion(CURRENT_ZEN_TIME); // the value to be displayed in text view.
+                       fragment.Timer.setText(ZEN_TIMER);
+
+                   }
 
                }
 
@@ -291,6 +291,33 @@ public class ZenActiviy extends AppCompatActivity {
         Date date = new Date();
         return dateFormat.format(date);
     }
+
+
+    public String MilliSecondCOnversion(long millis)
+    {
+        DateFormat datetime= new SimpleDateFormat("HH:mm:ss");
+        Date date = new Date(millis);
+        String x = datetime.format(date);
+        return x;
+    }
+    public String GenericTimeConversion(long millis)
+    {
+        /*int seconds = (int) TimeUnit.MILLISECONDS.toSeconds(millis) %60;
+        int minutes = (int) TimeUnit.MILLISECONDS.toMinutes(millis) %60;
+        int hours = (int) TimeUnit.MILLISECONDS.toHours(millis)%24;
+        String H = (hours<10)? "0"+String.valueOf(hours) : String.valueOf(hours);
+        String S = (seconds<10) ? "0"+String.valueOf(seconds):String.valueOf(seconds);
+        String M = (minutes<10) ? "0"+String.valueOf(minutes):String.valueOf(minutes);
+       String time = H+":"+M+":"+S;
+        return time;*/
+      return   String.format("%02d:%02d:%02d",
+                TimeUnit.MILLISECONDS.toHours(millis),
+                TimeUnit.MILLISECONDS.toMinutes(millis) -
+                        TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)), // The change is in this line
+                TimeUnit.MILLISECONDS.toSeconds(millis) -
+                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
+    }
+
 
     }
 
